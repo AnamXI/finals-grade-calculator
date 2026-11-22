@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'CI_BUILD_NUMBER', defaultValue: '1', description: 'The CI build number from the main branch to deploy')
+        choice(name: 'ENVIRONMENT', choices: ['DEV', 'TEST', 'ACC', 'PROD'], description: 'Select the deployment environment')
+    }
+
+    stages {
+        stage('Print Parameters') {
+            steps {
+                echo "====================================================="
+                echo "Deploying CI Build: ${params.CI_BUILD_NUMBER}"
+                echo "Target Environment: ${params.ENVIRONMENT}"
+                echo "====================================================="
+            }
+        }
+
+        stage('Copy Artifact from CI') {
+            steps {
+                // Grabs the specific tar.gz from the main branch CI job
+                copyArtifacts(
+                    projectName: 'Grade-Calculator-CI/main',
+                    selector: specific(params.CI_BUILD_NUMBER),
+                    target: '.'
+                )
+            }
+        }
+
+        stage('Extract Artifact') {
+            steps {
+                // Extracts the build folder and Dockerfile
+                sh 'tar -xzf react-app-${params.CI_BUILD_NUMBER}.tar.gz'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // Builds the image using the extracted artifact. No npm run build here!
+                sh 'docker build -t grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER} .'
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                // Stops and removes old container if it exists
+                sh 'docker rm -f grade-app-${params.ENVIRONMENT} || true'
+                
+                script {
+                    def port = "8082" // Default DEV
+                    if (params.ENVIRONMENT == 'TEST') port = "8083"
+                    if (params.ENVIRONMENT == 'ACC') port = "8084"
+                    if (params.ENVIRONMENT == 'PROD') port = "8085"
+
+                    // Runs the container on the specific port
+                    sh "docker run -d -p ${port}:80 --name grade-app-${params.ENVIRONMENT} grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER}"
+                    echo "Application is now accessible at http://localhost:${port}"
+                }
+            }
+        }
+    }
+}
