@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     tools {
-        // Matches the exact name we just configured in Jenkins
         nodejs 'NodeJS-22'
     }
 
@@ -15,8 +14,9 @@ pipeline {
 
         stage('Install and Test') {
             steps {
-                sh 'npm install'                
-                sh 'npm test -- --watchAll=false'               
+                // Uses install to bypass lockfile issues
+                sh 'npm install'
+                sh 'npm test -- --watchAll=false'
             }
         }
 
@@ -32,9 +32,8 @@ pipeline {
             }
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    // Installs the scanner locally in the workspace and runs it
-                    sh 'npm install -g sonarqube-scanner'
-                    sh 'sonar-scanner'
+                    // Uses the native plugin scanner and points to your LCOV report
+                    sh 'sonar-scanner -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
                 }
             }
         }
@@ -44,6 +43,7 @@ pipeline {
                 branch 'main'
             }
             steps {
+                // Waits for SonarQube to approve the code
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -67,7 +67,6 @@ pipeline {
                 branch 'main'
             }
             steps {
-                // Packages the build folder and Dockerfile into a versioned tar.gz
                 sh 'tar -czf react-app-${BUILD_NUMBER}.tar.gz build/ Dockerfile'
                 archiveArtifacts artifacts: 'react-app-*.tar.gz', fingerprint: true
             }
