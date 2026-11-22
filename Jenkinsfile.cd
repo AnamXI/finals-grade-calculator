@@ -29,16 +29,13 @@ pipeline {
 
         stage('Extract Artifact') {
             steps {
-                // FIX: Double quotes are REQUIRED here. Groovy must resolve ${params...} 
-                // before passing the string to the Linux shell, otherwise you get "Bad substitution".
                 sh "tar -xzf react-app-${params.CI_BUILD_NUMBER}.tar.gz"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // FIX: Double quotes here as well.
-                sh "docker build -t grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER} ."
+                sh "docker build -f Dockerfile.cd -t grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER} ."
             }
         }
 

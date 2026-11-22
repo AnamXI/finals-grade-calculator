@@ -69,7 +69,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'tar -czf react-app-${BUILD_NUMBER}.tar.gz build/ Dockerfile'
+                sh 'tar -czf react-app-${BUILD_NUMBER}.tar.gz build/ Dockerfile.cd'
                 archiveArtifacts artifacts: 'react-app-*.tar.gz', fingerprint: true
             }
         }
