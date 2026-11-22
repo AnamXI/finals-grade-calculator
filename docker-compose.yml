@@ -1,0 +1,65 @@
+services:
+  # ---------------------------------------------------------
+  # SONARQUBE SERVICE
+  sonarqube:
+    # Uses the official SonarQube Community Build image
+    image: sonarqube:community
+    # Gives the container a specific name so we can easily reference it
+    container_name: sonarqube
+
+    # Maps port 9000 on your Windows machine to port 9000 in the container
+    ports:
+      - "9000:9000"
+
+    environment:
+      # Disables a strict memory/OS check so it boots quickly on Docker Desktop
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+
+    volumes:
+      # Saves SonarQube's data so your projects/settings aren't lost if the container restarts
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+
+    networks:
+      # Connects SonarQube to our custom network so it can talk to Jenkins
+      - devops-net
+
+  # ---------------------------------------------------------
+  # JENKINS 
+  jenkins:
+    # Uses the official Long-Term Support (LTS) Jenkins image with Java 17
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins
+    user: root
+
+    # Maps port 8081 on Computer to port 8080 in the container (8080 is used by React)
+    # Maps port 50000 for Jenkins internal agent communication
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+
+    volumes:
+      # Saves Jenkins' settings, jobs, and plugins permanently on your hard drive
+      - jenkins_home:/var/jenkins_home
+
+      # THE MAGIC LINE: Mounts your host PC's Docker engine into the Jenkins container.
+      # This allows Jenkins to run 'docker build' commands without installing Docker again.
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    networks:
+      - devops-net
+
+# ---------------------------------------------------------
+# STORAGE VOLUMES
+# Tells Docker to create persistent storage spaces on your machine so we don't lose data when containers are stopped or deleted.
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  jenkins_home:
+
+    # ---------------------------------------------------------
+    # NETWORKS
+    # Creates a private virtual network so Jenkins can communicate with SonarQube
+networks:
+  devops-net:
+    driver: bridge
