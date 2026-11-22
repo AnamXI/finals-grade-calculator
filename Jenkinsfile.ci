@@ -26,14 +26,16 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+                stage('SonarQube Analysis') {
             when {
                 branch 'main' 
             }
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    // Uses the native plugin scanner and points to your LCOV report
-                    sh 'sonar-scanner -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
+            steps {                
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
+                    }
                 }
             }
         }
