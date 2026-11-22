@@ -29,22 +29,23 @@ pipeline {
 
         stage('Extract Artifact') {
             steps {
-                // Extracts the build folder and Dockerfile
-                sh 'tar -xzf react-app-${params.CI_BUILD_NUMBER}.tar.gz'
+                // FIX: Double quotes are REQUIRED here. Groovy must resolve ${params...} 
+                // before passing the string to the Linux shell, otherwise you get "Bad substitution".
+                sh "tar -xzf react-app-${params.CI_BUILD_NUMBER}.tar.gz"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Builds the image using the extracted artifact. No npm run build here!
-                sh 'docker build -t grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER} .'
+                // FIX: Double quotes here as well.
+                sh "docker build -t grade-app:${params.ENVIRONMENT}-${params.CI_BUILD_NUMBER} ."
             }
         }
 
         stage('Deploy Container') {
             steps {
-                // Stops and removes old container if it exists
-                sh 'docker rm -f grade-app-${params.ENVIRONMENT} || true'
+                // FIX: Use double quotes so Groovy injects the environment name.
+                sh "docker rm -f grade-app-${params.ENVIRONMENT} || true"
                 
                 script {
                     def port = "8082" // Default DEV
