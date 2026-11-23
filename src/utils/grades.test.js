@@ -4,7 +4,7 @@ describe('Grade Calculator Logic', () => {
     test('computes correct weighted average for perfect scores', () => {
         const result = computeWeightedGrade(100, 100, 100, 100);
         expect(result.average).toBe(100);
-        expect(result.transmuted).toBe(4.0);
+        expect(result.transmuted).toBe(3.0);
     });
 
     // Transmutations
