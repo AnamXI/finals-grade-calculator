@@ -29,7 +29,7 @@ services:
   jenkins:
     # Uses the official Long-Term Support (LTS) Jenkins image with Java 17
     image: jenkins/jenkins:lts-jdk17
-    container_name: jenkins
+    container_name: jenkins2
     user: root
 
     # Maps port 8081 on Computer to port 8080 in the container (8080 is used by React)

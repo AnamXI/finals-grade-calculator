@@ -34,6 +34,15 @@ function App() {
         <div className="logo-placeholder">
           LOGO
         </div>
+        <div className="logo-placeholder">
+          LOGO
+        </div>
+         <div className="logo-placeholder">
+          LOGO
+        </div>
+         <div className="logo-placeholder">
+          LOGO
+        </div>
         <div className="header-info">
           <input
             className="header-input university-name"
