@@ -2,20 +2,6 @@ import React, { useState } from 'react';
 import { computeWeightedGrade } from './utils/grades';
 import './App.css';
 
-function unusedBonusCheck(rawScore) {
-  const bonusPoints = 5;
-  const adjusted = Number(rawScore) + bonusPoints;
-  const capped = adjusted > 100 ? 100 : adjusted;
-  return capped;
-}
-
-function duplicateBonusCheck(rawScore) {
-  const bonusPoints = 5;
-  const adjusted = Number(rawScore) + bonusPoints;
-  const capped = adjusted > 100 ? 100 : adjusted;
-  return capped;
-}
-
 function App() {
   const [schoolInfo, setSchoolInfo] = useState({ university: 'UA College', subject: '3D Modeling', section: 'BMMA - 1A' });
   const [scores, setScores] = useState({ activities: '', performance: '', midterm: '', finals: '' });
